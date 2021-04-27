@@ -7,7 +7,7 @@ pub fn say(s: &str) -> String {
     return r + s;
 }
 
-const FILE_NAME: &str = "iris_knn.model";
+const FILE_NAME: &str = "/iris_knn.model";
 use std::fs::File;
 use ssvm_wasi_helper::ssvm_wasi_helper::_initialize;
 use std::io::{Write, Read};
