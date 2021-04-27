@@ -11,6 +11,11 @@ fn main() {
     let model = build_model();
     save_model(model);
     let loaded_model = load_model();
+    let data = DenseMatrix::from_array(1, 6, &[234.289, 235.6, 159.0, 107.608, 1947., 60.323]);
+
+    let prediction = loaded_model.predict(&data).unwrap();
+    println!("{}", prediction[0]);
+    assert!(prediction[0] > 83. * 0.9 && prediction[0] < 83. * 1.1);
 }
 
 fn build_model() -> LinearRegression<f64, DenseMatrix<f64>> {

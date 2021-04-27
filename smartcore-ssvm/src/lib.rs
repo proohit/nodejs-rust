@@ -2,9 +2,49 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn say(s: &str) -> String {
-  println!("The Rust function say() received {}", s);
-  let r = String::from("hello ");
-  return r + s;
+    println!("The Rust function say() received {}", s);
+    let r = String::from("hello ");
+    return r + s;
+}
+
+const FILE_NAME: &str = "iris_knn.model";
+use std::fs::File;
+use ssvm_wasi_helper::ssvm_wasi_helper::_initialize;
+use std::io::{Write, Read};
+
+#[wasm_bindgen]
+pub fn create_file(path: &str, content: &str) -> String {
+  _initialize();
+  let mut output = File::create(path).unwrap();
+  output.write_all(content.as_bytes()).unwrap();
+  path.to_string()
+}
+
+#[wasm_bindgen]
+pub fn read_file(path: &str) -> String {
+  _initialize();
+  let mut f = File::open(path).unwrap();
+  let mut s = String::new();
+  match f.read_to_string(&mut s) {
+    Ok(_) => s,
+    Err(e) => e.to_string(),
+  }
+}
+
+#[wasm_bindgen]
+pub fn load_model() -> String {
+    _initialize();
+        let model: LinearRegression<f64, DenseMatrix<f64>> = {
+            let mut buf: Vec<u8> = Vec::new();
+            File::open(&FILE_NAME)
+                .and_then(|mut f| f.read_to_end(&mut buf))
+                .expect("Can not load model");
+            bincode::deserialize(&buf).expect("Can not deserialize the model")
+        };
+        let data = DenseMatrix::from_array(1, 6, &[234.289, 235.6, 159.0, 107.608, 1947., 60.323]);
+
+        let prediction = model.predict(&data).unwrap();
+        return prediction[0].to_string();
 }
 
 // DenseMatrix wrapper around Vec
