@@ -1,6 +1,7 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+extern crate console_error_panic_hook;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -31,6 +32,7 @@ use smartcore::model_selection::train_test_split;
 // Load dataset
 #[wasm_bindgen]
 pub fn basic_prediction() -> String {
+    console_error_panic_hook::set_once();
     let x = DenseMatrix::from_2d_array(&[
         &[234.289, 235.6, 159.0, 107.608, 1947., 60.323],
         &[259.426, 232.5, 145.6, 108.632, 1948., 61.122],
