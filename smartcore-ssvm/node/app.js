@@ -7,16 +7,8 @@ const port = 3000;
 
 const server = http.createServer((req, res) => {
   create_file("/hello.txt", "Hello WASI SSVM\nThis is in the `pkg` folder\n");
-
-  const queryObject = url.parse(req.url, true).query;
-  if (!queryObject['name']) {
-    res.end(`Please use command curl http://${hostname}:${port}/?name=MyName \n`);
-  } else {
-    console.log( read_file("/hello.txt") );
-
-    res.end(load_model());
-    // res.end(say(queryObject['name']) + '\n');
-  }
+  console.log(read_file("/hello.txt"));
+  res.end(load_model());
 });
 
 server.listen(port, hostname, () => {
