@@ -16,9 +16,8 @@
 // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
 const {readFileSync} = require('fs')
 
-const rawConnectionString = readFileSync('config.json');
-const config = JSON.parse(rawConnectionString);
-const connectionString = config.connectionString;
+const config = JSON.parse(readFileSync('config.json'));
+const connectionString = config.deviceConnectionString;
 const modelPath = config.modelPath;
 
 // Using the Node.js Device SDK for IoT Hub:

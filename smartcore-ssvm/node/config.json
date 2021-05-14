@@ -1,4 +1,6 @@
 {
-    "connectionString": "",
-    "modelPath": "../pkg/iris_knn.model"
+    "deviceConnectionString": "",
+    "hubConnectionString": "",
+    "modelPath": "../pkg/iris_knn.model",
+    "targetDevice": ""
 }
