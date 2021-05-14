@@ -17,7 +17,7 @@
 const {readFileSync} = require('fs')
 
 const config = JSON.parse(readFileSync('config.json'));
-const connectionString = config.deviceConnectionString;
+const connectionString = config.deviceConnection;
 const modelPath = config.modelPath;
 
 // Using the Node.js Device SDK for IoT Hub:

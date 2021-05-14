@@ -2,12 +2,22 @@
 
 const Client = require('azure-iothub').Client;
 const Message = require('azure-iot-common').Message;
-const {readFileSync} = require('fs');
+const Registry = require('azure-iothub').Registry;
+const { readFileSync } = require('fs');
 const config = JSON.parse(readFileSync('config.json'));
-const connectionString = config.hubConnectionString;
-const targetDevice = config.targetDevice;
-
-var serviceClient = Client.fromConnectionString(connectionString);
+const hubConnectionString = config.hubConnection;
+const hubDevicesConnectionString = config.registryReadConnection;
+let targetDevices = [];
+const onDevicesQuery = (err, results) => {
+  if (err) {
+    console.error('Failed to fetch the results: ' + err.message);
+  } else {
+    targetDevices = results.map(twin => twin.deviceId);
+    console.log(targetDevices);
+  }
+};
+Registry.fromConnectionString(hubDevicesConnectionString).createQuery('SELECT * FROM devices').nextAsTwin(onDevicesQuery);
+var serviceClient = Client.fromConnectionString(hubConnectionString);
 
 function printResultFor(op) {
   return function printResult(err, res) {
@@ -32,6 +42,8 @@ serviceClient.open(function (err) {
     message.ack = 'full';
     message.messageId = 'My Message ID';
     console.log('Sending message: ' + message.getData());
-    serviceClient.send(targetDevice, message, printResultFor('send'));
+    for (const targetDevice of targetDevices) {
+      serviceClient.send(targetDevice, message, printResultFor('send'));
+    }
   }
 });
