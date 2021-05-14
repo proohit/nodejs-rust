@@ -1,0 +1,4 @@
+{
+    "connectionString": "",
+    "modelPath": "../pkg/iris_knn.model"
+}
