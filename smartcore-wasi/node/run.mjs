@@ -2,17 +2,28 @@ import fs from 'fs';
 import wasiImport from 'wasi'
 const { WASI } = wasiImport;
 
-const wasi = new WASI({
-  args: process.argv,
+const cmdWasi = new WASI({
+  args: [],
   env: process.env,
   preopens: {
-    '/': '.'
+    '.': '.'
   }
 });
 
-const importObject = { wasi_snapshot_preview1: wasi.wasiImport };
+const libWasi = new WASI({
+  args: ["load_model"],
+  env: process.env,
+  preopens: {
+    '.': '.'
+  }
+});
 
-const wasm = await WebAssembly.compile(fs.readFileSync('smartcore_wasi_lib.wasm'));
-const instance = await WebAssembly.instantiate(wasm, importObject);
-wasi.initialize(instance);
-instance.exports.load_model()
+const cmdImportObject = { wasi_snapshot_preview1: cmdWasi.wasiImport };
+const libImportObject = { wasi_snapshot_preview1: libWasi.wasiImport };
+
+const wasm = await WebAssembly.compile(fs.readFileSync('smartcore-wasi.wasm'));
+let instance = await WebAssembly.instantiate(wasm, cmdImportObject);
+// wasi.initialize(instance);
+cmdWasi.start(instance);
+instance = await WebAssembly.instantiate(wasm, libImportObject);
+libWasi.start(instance);
