@@ -6,18 +6,40 @@ use smartcore::linalg::naive::dense_matrix::DenseMatrix;
 use smartcore::linear::linear_regression::LinearRegression;
 
 const FILE_NAME: &str = "iris_knn.model";
+use std::env;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 0 {
+        run_lib_mode(args);
+        return;
+    } else {
+        run_cmd_mode();
+    }
+}
+
+fn run_lib_mode(args: Vec<String>) {
+    let cmd = &args[0];
+    println!("running in lib mode");
+    if cmd == "load_model" {
+        let loaded_model = load_model();
+        let data = DenseMatrix::from_array(1, 6, &[234.289, 235.6, 159.0, 107.608, 1947., 60.323]);
+        let prediction = loaded_model.predict(&data).unwrap();
+        println!("{}", prediction[0]);
+        assert!(prediction[0] > 83. * 0.9 && prediction[0] < 83. * 1.1);
+        return;
+    }
+}
+
+fn run_cmd_mode() {
     let model = build_model();
     save_model(model);
     let loaded_model = load_model();
     let data = DenseMatrix::from_array(1, 6, &[234.289, 235.6, 159.0, 107.608, 1947., 60.323]);
-
     let prediction = loaded_model.predict(&data).unwrap();
     println!("{}", prediction[0]);
     assert!(prediction[0] > 83. * 0.9 && prediction[0] < 83. * 1.1);
 }
-
 fn build_model() -> LinearRegression<f64, DenseMatrix<f64>> {
     // Load dataset
     let x = DenseMatrix::from_2d_array(&[
