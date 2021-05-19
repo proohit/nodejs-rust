@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": "smartcore-wasi/python/env/bin/python",
+    "azureFunctions.deploySubpath": "smartcore-ssvm/azure-functions",
+    "azureFunctions.postDeployTask": "npm install",
+    "azureFunctions.projectLanguage": "JavaScript",
+    "azureFunctions.projectRuntime": "~3",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "npm prune",
+    "azureFunctions.projectSubpath": "smartcore-ssvm/azure-functions"
+}
