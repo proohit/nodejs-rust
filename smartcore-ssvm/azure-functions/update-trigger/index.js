@@ -10,16 +10,6 @@ module.exports = async function (context, req) {
     const config = JSON.parse(readFileSync(`${__dirname}/config.json`));
     const hubConnectionString = config.hubConnection;
     const hubDevicesConnectionString = config.registryReadConnection;
-    let targetDevices = [];
-    const onDevicesQuery = (err, results) => {
-        if (err) {
-            console.error('Failed to fetch the results: ' + err.message);
-        } else {
-            targetDevices = results.map(twin => twin.deviceId);
-            console.log(targetDevices);
-        }
-    };
-    Registry.fromConnectionString(hubDevicesConnectionString).createQuery('SELECT * FROM devices').nextAsTwin(onDevicesQuery);
     let serviceClient = Client.fromConnectionString(hubConnectionString);
 
     function printResultFor(op) {
@@ -34,10 +24,13 @@ module.exports = async function (context, req) {
             console.log(msg.getData().toString('utf-8'));
         });
     }
-    serviceClient.open(function (err) {
+    serviceClient.open(async (err) => {
         if (err) {
             console.error('Could not connect: ' + err.message);
         } else {
+            const {result: devices} = await Registry.fromConnectionString(hubDevicesConnectionString).createQuery('SELECT * FROM devices').nextAsTwin();
+            const targetDevices = devices.map(twin => twin.deviceId);
+            console.log(targetDevices);
             console.log('Service client connected');
             serviceClient.getFeedbackReceiver(receiveFeedback);
             var message = new Message(JSON.stringify({

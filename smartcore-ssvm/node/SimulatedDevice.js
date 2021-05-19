@@ -29,7 +29,7 @@ var client = DeviceClient.fromConnectionString(connectionString, Mqtt);
 const fetch = require('node-fetch');
 
 client.on('message', function (msg) {
-  console.log(`Received MessageId: ${msg.messageId}`);
+  console.log(`Received MessageId: ${msg.messageId} on ${new Date().toISOString()}`);
   const res = JSON.parse(msg.data);
   console.log('Parsed Body: ', res);
   const hasJs = res.runtimes.includes('js');
@@ -37,9 +37,10 @@ client.on('message', function (msg) {
   if (hasJs && action === 'update') {
     const moduleUrl = `${url}/${version}/js.tar`;
     console.log('Fetching: ', moduleUrl);
-    if (existsSync('./lib/js')) {
-      rmdirSync('./lib/js')
+    if (existsSync('./lib')) {
+      rmSync('./lib', { recursive: true, force: true })
     }
+    mkdirSync('./lib');
     mkdirSync('./lib/js');
 
     fetch(moduleUrl).then(response => {
