@@ -14,7 +14,7 @@
 //
 // Using the Azure CLI:
 // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
-const { readFileSync, mkdirSync, createWriteStream, existsSync, rmdirSync } = require('fs')
+const { readFileSync, mkdirSync, existsSync, rmSync } = require('fs')
 
 const config = JSON.parse(readFileSync('config.json'));
 const connectionString = config.deviceConnection;
@@ -59,10 +59,10 @@ client.on('message', function (msg) {
 
 const http = require('http');
 const hostname = '0.0.0.0';
-const port = 3001;
+const port = 3000;
 let load_model;
 const server = http.createServer((req, res) => {
-  if(!load_model) {
+  if (!load_model) {
     load_model = require('./lib/js/ssvm_nodejs_starter_lib.js').load_model;
   }
   res.end(load_model());
