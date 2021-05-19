@@ -14,11 +14,10 @@
 //
 // Using the Azure CLI:
 // az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
-const {readFileSync} = require('fs')
+const { readFileSync, mkdirSync, createWriteStream, existsSync } = require('fs')
 
 const config = JSON.parse(readFileSync('config.json'));
 const connectionString = config.deviceConnection;
-const modelPath = config.modelPath;
 
 // Using the Node.js Device SDK for IoT Hub:
 //   https://github.com/Azure/azure-iot-sdk-node
@@ -27,10 +26,24 @@ var Mqtt = require('azure-iot-device-mqtt').Mqtt;
 var DeviceClient = require('azure-iot-device').Client;
 
 var client = DeviceClient.fromConnectionString(connectionString, Mqtt);
+const fetch = require('node-fetch');
 
 client.on('message', function (msg) {
-  console.log('Id: ' + msg.messageId + ' Body: ' + msg.data);
-  require('fs').writeFileSync(modelPath, msg.data);
+  console.log(`Received MessageId: ${msg.messageId}`);
+  const res = JSON.parse(msg.data);
+  console.log('Parsed Body: ', res);
+  const hasJs = res.runtimes.includes('js');
+  const { action, version, url } = res;
+  if (hasJs && action === 'update') {
+    const moduleUrl = `${url}/${version}/js.tar`;
+    console.log('Fetching: ', moduleUrl);
+    if (!existsSync('./lib/js')) {
+      mkdirSync('./lib/js');
+    }
+    fetch(moduleUrl).then(response => {
+      response.body.pipe(require('tar').x({ cwd: './lib/js' }));
+    });
+  }
   client.complete(msg, function (err) {
     if (err) {
       console.error('complete error: ' + err.toString());
@@ -40,11 +53,11 @@ client.on('message', function (msg) {
   });
 });
 
-const { load_model } = require('../pkg/ssvm_nodejs_starter_lib.js');
+const { load_model } = require('./lib/js/ssvm_nodejs_starter_lib.js');
 
 const http = require('http');
 const hostname = '0.0.0.0';
-const port = 3000;
+const port = 3001;
 
 const server = http.createServer((req, res) => {
   res.end(load_model());

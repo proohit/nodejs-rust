@@ -11,6 +11,8 @@
   "dependencies": {
     "azure-iot-device": "^1.17.3",
     "azure-iot-device-mqtt": "^1.15.3",
-    "azure-iothub": "^1.14.0"
+    "azure-iothub": "^1.14.0",
+    "node-fetch": "^2.6.1",
+    "tar": "^6.1.0"
   }
 }

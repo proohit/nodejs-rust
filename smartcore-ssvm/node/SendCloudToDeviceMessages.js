@@ -37,8 +37,7 @@ serviceClient.open(function (err) {
   } else {
     console.log('Service client connected');
     serviceClient.getFeedbackReceiver(receiveFeedback);
-    const modelBuf = readFileSync('iris_knn.model');
-    var message = new Message(modelBuf);
+    var message = new Message("{\"action\":\"update\",\"version\":\"0.0.1\",\"url\":\"https://github.com/proohit/nodejs-rust/releases/download\",\"runtimes\":[\"js\"]}");
     message.ack = 'full';
     message.messageId = 'My Message ID';
     console.log('Sending message: ' + message.getData());
