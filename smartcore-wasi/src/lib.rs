@@ -1,8 +1,14 @@
-use std::ffi::{CStr};
+use std::ffi::{CStr, CString};
 use std::fs;
 use std::io::{Read, Write};
 use std::mem;
 use std::os::raw::{c_char, c_void};
+use std::fs::File;
+// DenseMatrix wrapper around Vec
+use smartcore::linalg::naive::dense_matrix::DenseMatrix;
+// Linear Regression
+use smartcore::linear::linear_regression::LinearRegression;
+const FILE_NAME: &str = "/iris_knn.model";
 
 #[no_mangle]
 pub extern "C" fn allocate(size: usize) -> *mut c_void {
@@ -20,30 +26,20 @@ pub extern "C" fn deallocate(pointer: *mut c_void, capacity: usize) {
     }
 }
 
-fn process(input_fname: &str, output_fname: &str) -> Result<(), String> {
-    let mut input_file = fs::File::open(input_fname)
-        .map_err(|err| format!("error opening input {}: {}", input_fname, err))?;
-    let mut contents = Vec::new();
-    input_file
-        .read_to_end(&mut contents)
-        .map_err(|err| format!("read error: {}", err))?;
-
-    let mut output_file = fs::File::create(output_fname)
-        .map_err(|err| format!("error opening output {}: {}", output_fname, err))?;
-    output_file
-        .write_all(&contents)
-        .map_err(|err| format!("write error: {}", err))
-}
-
 #[no_mangle]
-pub unsafe fn load_model(input_ptr: *mut c_char, output_ptr: *mut c_char) -> () {
-    let input_fname = CStr::from_ptr(input_ptr);
-    let output_fname = CStr::from_ptr(output_ptr);
+pub fn load_model() -> *mut c_char  {
+    // let input_fname = CStr::from_ptr(input_ptr);
+    // let output_fname = CStr::from_ptr(output_ptr);
+        let model: LinearRegression<f64, DenseMatrix<f64>> = {
+            let mut buf: Vec<u8> = Vec::new();
+            File::open(&FILE_NAME)
+                .and_then(|mut f| f.read_to_end(&mut buf))
+                .expect("Can not load model");
+            bincode::deserialize(&buf).expect("Can not deserialize the model")
+        };
+        let data = DenseMatrix::from_array(1, 6, &[234.289, 235.6, 159.0, 107.608, 1947., 60.323]);
 
-    if let Err(err) = process(
-        input_fname.to_str().unwrap(),
-        output_fname.to_str().unwrap(),
-    ) {
-        eprintln!("{}", err)
-    }
+        let prediction = model.predict(&data).unwrap();
+        let pred: String = prediction[0].to_string();
+        return unsafe { CString::from_vec_unchecked(pred.as_bytes().to_vec()).into_raw()}
 }

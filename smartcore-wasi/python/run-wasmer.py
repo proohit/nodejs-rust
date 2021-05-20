@@ -15,6 +15,25 @@ def get_string_ptr(string, instance):
     memory[length_of_string] = 0  # C-string terminates by NULL.
     return (string_ptr, length_of_string)
 
+def get_string_from_ptr(ptr, instance):
+    memory = instance.exports.memory.uint8_view(ptr)
+    memory_length = len(memory)
+    print(memory_length)
+    output = []
+    nth = 0
+
+    while nth < memory_length:
+        byte = memory[nth]
+
+        if byte == 0:
+            break
+
+        output.append(byte)
+        nth += 1
+    length_of_output = nth
+
+    return (bytes(output).decode(), length_of_output)
+
 
 def invoke_fn_with_params(fn, instance, *param_ptrs):
     instance.exports[fn](*param_ptrs)
@@ -34,33 +53,10 @@ instance = Instance(module, import_object)
 (ptr_file_to_copy, len1) = get_string_ptr('test1.txt', instance)
 (ptr_target, len2) = get_string_ptr('test2.txt', instance)
 
-instance.exports.load_model(ptr_file_to_copy, ptr_target)
+output_ptr = instance.exports.load_model()
+(output, output_len) = get_string_from_ptr(output_ptr, instance)
+print(output)
 instance.exports.deallocate(ptr_file_to_copy, len1)
 instance.exports.deallocate(ptr_target, len2)
+instance.exports.deallocate(output_ptr, output_len)
 
-# # Run the `greet` function. Give the pointer to the subject.
-# output_pointer = instance.exports.greet(ftcPtr)
-
-# # Read the result of the `greet` function.
-# memory = instance.exports.memory.uint8_view(output_pointer)
-# memory_length = len(memory)
-
-# output = []
-# nth = 0
-
-# while nth < memory_length:
-#     byte = memory[nth]
-
-#     if byte == 0:
-#         break
-
-#     output.append(byte)
-#     nth += 1
-
-# length_of_output = nth
-
-# print(bytes(output).decode())
-
-# # Deallocate the subject, and the output.
-# instance.exports.deallocate(ftcPtr, length_of_filename)
-# instance.exports.deallocate(output_pointer, length_of_output)

@@ -18,8 +18,8 @@ const getStringPointer = (data, instance) => {
   var length = data.length + 1;
   const targetMem = new Uint8Array(length);
   enc.encodeInto(data, targetMem);
-  targetMem[length-1] = 0;
-  
+  targetMem[length - 1] = 0;
+
   var ptr = instance.exports.allocate(length);
   // create a typed `ArrayBuffer` at `ptr` of proper size
   var mem = new Uint8Array(instance.exports.memory.buffer, ptr, length);
@@ -27,6 +27,20 @@ const getStringPointer = (data, instance) => {
   mem.set(targetMem);
   // return the pointer
   return { ptr, len: length };
+}
+
+const getStringFromPointer = (ptr, instance) => {
+  var m = new Uint8Array(instance.exports.memory.buffer, ptr);
+  let len = m.length;
+  let lengthOfString = 0;
+  for (; lengthOfString < len; lengthOfString++) {
+    let byte = m[lengthOfString];
+    if (byte === 0) {
+      break
+    }
+  }
+  var decoder = new TextDecoder("utf-8");
+  return { result: decoder.decode(m.slice(0, lengthOfString)), len: lengthOfString };
 }
 
 const wasi = new WASI({
@@ -45,6 +59,9 @@ wasi.initialize(instance);
 let { ptr: fileToCopyPtr, len: len1 } = getStringPointer("./test1.txt", instance);
 let { ptr: targetPtr, len: len2 } = getStringPointer("./test2.txt", instance);
 
-instance.exports.load_model(fileToCopyPtr, targetPtr);
+let outputPtr = instance.exports.load_model();
+let {result: output, len: outputLength} = getStringFromPointer(outputPtr, instance);
+console.log(output)
 instance.exports.deallocate(fileToCopyPtr, len1);
 instance.exports.deallocate(targetPtr, len2);
+instance.exports.deallocate(outputPtr, outputLength);
