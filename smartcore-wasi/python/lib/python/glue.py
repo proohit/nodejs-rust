@@ -44,11 +44,11 @@ wasi_env = wasi.StateBuilder(
 import_object = wasi_env.generate_import_object(store, wasi_version)
 
 instance = Instance(module, import_object)
+(file_ptr, file_len) = get_string_ptr(f'{relative_dir}/iris_knn.model', instance)
+instance.exports.init(file_ptr)
 
 def load_model():
-    (file_ptr, file_len) = get_string_ptr(f'{relative_dir}/iris_knn.model', instance)
-    output_ptr = instance.exports.load_model(file_ptr)
+    output_ptr = instance.exports.load_model()
     (output, output_len) = get_string_from_ptr(output_ptr, instance)
     instance.exports.deallocate(output_ptr, output_len)
-    instance.exports.deallocate(file_ptr, file_len)
     return output

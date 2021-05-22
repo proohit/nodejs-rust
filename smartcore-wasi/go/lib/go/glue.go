@@ -1,12 +1,14 @@
 package glue
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	wasmer "github.com/wasmerio/wasmer-go/wasmer"
 )
 
-var Instance *wasmer.Instance
+var instance *wasmer.Instance
+var relativeDir string = "lib/go"
 
 func getStringPointer(data string, instance *wasmer.Instance) (int32, int) {
 	// Set the subject to greet.
@@ -33,7 +35,7 @@ func getStringPointer(data string, instance *wasmer.Instance) (int32, int) {
 }
 
 func initialize() {
-	wasmBytes, _ := ioutil.ReadFile("glue/smartcore_wasi_lib.wasm")
+	wasmBytes, _ := ioutil.ReadFile(fmt.Sprintf("%s/smartcore_wasi_lib.wasm", relativeDir))
 	engine := wasmer.NewEngine()
 	store := wasmer.NewStore(engine)
 
@@ -47,7 +49,10 @@ func initialize() {
 	importObject, _ := wasiEnv.GenerateImportObject(store, module)
 	newInstance, _ := wasmer.NewInstance(module, importObject)
 
-	Instance = newInstance
+	instance = newInstance
+	init, _ := instance.Exports.GetFunction("init")
+	filePtr, _ := getStringPointer(fmt.Sprintf("%s/iris_knn.model", relativeDir), instance)
+	init(filePtr)
 }
 
 func getStringFromPointer(ptr int32, instance *wasmer.Instance) (string, int) {
@@ -65,15 +70,13 @@ func getStringFromPointer(ptr int32, instance *wasmer.Instance) (string, int) {
 
 func Load_model() string {
 
-	if Instance == nil {
+	if instance == nil {
 		initialize()
 	}
-	load_model, _ := Instance.Exports.GetFunction("load_model")
-	deallocate, _ := Instance.Exports.GetFunction("deallocate")
-	modelPath, pathlen := getStringPointer("glue/iris_knn.model", Instance)
-	outputPtr, _ := load_model(modelPath)
-	output, outputLen := getStringFromPointer(outputPtr.(int32), Instance)
+	load_model, _ := instance.Exports.GetFunction("load_model")
+	deallocate, _ := instance.Exports.GetFunction("deallocate")
+	outputPtr, _ := load_model()
+	output, outputLen := getStringFromPointer(outputPtr.(int32), instance)
 	deallocate(outputPtr, outputLen)
-	deallocate(modelPath, pathlen)
 	return output
 }

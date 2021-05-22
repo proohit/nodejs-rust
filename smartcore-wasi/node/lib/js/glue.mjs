@@ -52,16 +52,18 @@ const wasi = new WASI({
 });
 
 const importObject = { wasi_snapshot_preview1: wasi.wasiImport };
+const relativeDir = 'lib/js';
 
-const wasm = await WebAssembly.compile(fs.readFileSync('lib/js/smartcore_wasi_lib.wasm'));
+const wasm = await WebAssembly.compile(fs.readFileSync(`${relativeDir}/smartcore_wasi_lib.wasm`));
 const instance = await WebAssembly.instantiate(wasm, importObject);
+
 wasi.initialize(instance);
+let { ptr: fileToCopyPtr, len: len1 } = getStringPointer(`${relativeDir}/iris_knn.model`, instance);
+instance.exports.init(fileToCopyPtr);
 
 export const loadModel = () => {
-    let { ptr: fileToCopyPtr, len: len1 } = getStringPointer("lib/js/iris_knn.model", instance);
-    let outputPtr = instance.exports.load_model(fileToCopyPtr);
+    let outputPtr = instance.exports.load_model();
     let { result: output, len: outputLength } = getStringFromPointer(outputPtr, instance);
-    instance.exports.deallocate(fileToCopyPtr, len1);
     instance.exports.deallocate(outputPtr, outputLength);
     return output;
 }
