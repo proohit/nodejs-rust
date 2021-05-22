@@ -12,4 +12,7 @@ pip install -r requirements.txt
 
 ## Run
 
-`python run-wasmer.py`
+There are two examples to run: One uses Wasmer and the other one uses Wasmtime as the underlying WASM VM.
+
+`python run_wasmer.py`
+`python run_wasmtime.py`
