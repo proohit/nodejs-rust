@@ -2,6 +2,8 @@
 
 ## Build
 
-Build to library mode with reactor:
+Build to library module:
 
-`cargo rustc --release --target wasm32-wasi -- -Z wasi-exec-model=reactor`
+`cargo build --release --target=wasm32-wasi`
+
+Tested with rust v.1.54.0 and v.1.52.1
