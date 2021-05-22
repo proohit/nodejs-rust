@@ -1,5 +1,6 @@
-import fs from "fs";
-import wasiImport from "wasi";
+const fs = require("fs");
+const wasiImport = require("wasi");
+
 const { WASI } = wasiImport;
 
 const getStringPointer = (data, instance) => {
@@ -43,19 +44,25 @@ const wasi = new WASI({
 const importObject = { wasi_snapshot_preview1: wasi.wasiImport };
 const relativeDir = "lib/js";
 
-const wasm = await WebAssembly.compile(
-  fs.readFileSync(`${relativeDir}/smartcore_wasi_lib.wasm`)
-);
-const instance = await WebAssembly.instantiate(wasm, importObject);
+let instance;
 
-wasi.initialize(instance);
-let { ptr: fileToCopyPtr, len: len1 } = getStringPointer(
-  `${relativeDir}/iris_knn.model`,
-  instance
-);
-instance.exports.init(fileToCopyPtr);
+const initialize = async () => {
+  const wasm = await WebAssembly.compile(
+    fs.readFileSync(`${relativeDir}/smartcore_wasi_lib.wasm`)
+  );
+  instance = await WebAssembly.instantiate(wasm, importObject);
+  wasi.initialize(instance);
+  let { ptr: fileToCopyPtr, len: len1 } = getStringPointer(
+    `${relativeDir}/iris_knn.model`,
+    instance
+  );
+  instance.exports.init(fileToCopyPtr);
+};
 
-export const loadModel = () => {
+const loadModel = async () => {
+  if (!instance) {
+    await initialize();
+  }
   let outputPtr = instance.exports.load_model();
   let { result: output, len: outputLength } = getStringFromPointer(
     outputPtr,
@@ -64,3 +71,5 @@ export const loadModel = () => {
   instance.exports.deallocate(outputPtr, outputLength);
   return output;
 };
+
+module.exports = { loadModel };
