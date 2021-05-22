@@ -10,11 +10,12 @@ const lib = "./lib/js/glue.js";
 // function resetLib() {
 //   try {
 //     console.log("reseting fn");
+//     loadModel = undefined;
 //     delete require.cache[require.resolve(lib)];
+//     require(lib).initialize();
 //   } catch (e) {
 //     console.log(e);
 //   }
-//   load_model = undefined;
 // }
 
 const server = http.createServer((req, res) => {

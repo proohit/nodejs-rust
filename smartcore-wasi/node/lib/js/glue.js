@@ -47,6 +47,7 @@ const relativeDir = "lib/js";
 let instance;
 
 const initialize = async () => {
+  console.log("Initializing module");
   const wasm = await WebAssembly.compile(
     fs.readFileSync(`${relativeDir}/smartcore_wasi_lib.wasm`)
   );
@@ -57,6 +58,7 @@ const initialize = async () => {
     instance
   );
   instance.exports.init(fileToCopyPtr);
+  console.log("Initialization complete");
 };
 
 const loadModel = async () => {
@@ -72,4 +74,4 @@ const loadModel = async () => {
   return output;
 };
 
-module.exports = { loadModel };
+module.exports = { loadModel, initialize };
