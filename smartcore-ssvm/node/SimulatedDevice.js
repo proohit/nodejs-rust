@@ -1,51 +1,52 @@
-'use strict';
-const { readFileSync, mkdirSync, existsSync, rmSync } = require('fs')
+"use strict";
+const { readFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 
-const config = JSON.parse(readFileSync('config.json'));
+const config = JSON.parse(readFileSync("config.json"));
 const connectionString = config.deviceConnection;
 
-var Mqtt = require('azure-iot-device-mqtt').Mqtt;
-var DeviceClient = require('azure-iot-device').Client;
+var Mqtt = require("azure-iot-device-mqtt").Mqtt;
+var DeviceClient = require("azure-iot-device").Client;
 
 var client = DeviceClient.fromConnectionString(connectionString, Mqtt);
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
-client.on('message', function (msg) {
-  console.log(`Received MessageId: ${msg.messageId} on ${new Date().toISOString()}`);
+client.on("message", function (msg) {
+  console.log(
+    `Received MessageId: ${msg.messageId} on ${new Date().toISOString()}`
+  );
   const res = JSON.parse(msg.data);
-  console.log('Parsed Body: ', res);
-  const hasJs = res.runtimes.includes('js');
+  console.log("Parsed Body: ", res);
+  const hasJs = res.runtimes.includes("js");
   const { action, version, url } = res;
-  if (hasJs && action === 'update') {
+  if (hasJs && action === "update") {
     const moduleUrl = `${url}/${version}/js.tar`;
-    console.log('Fetching: ', moduleUrl);
-    if (existsSync('./lib')) {
-      rmSync('./lib', { recursive: true, force: true })
+    console.log("Fetching: ", moduleUrl);
+    if (existsSync("./lib")) {
+      rmSync("./lib", { recursive: true, force: true });
     }
-    mkdirSync('./lib');
-    mkdirSync('./lib/js');
+    mkdirSync("./lib");
+    mkdirSync("./lib/js");
 
-    fetch(moduleUrl).then(response => {
-      response.body.pipe(require('tar').x({ cwd: './lib/js', sync: true }));
+    fetch(moduleUrl).then((response) => {
+      response.body.pipe(require("tar").x({ cwd: "./lib/js", sync: true }));
       client.complete(msg, function (err) {
         if (err) {
-          console.error('complete error: ' + err.toString());
+          console.error("complete error: " + err.toString());
         } else {
-          console.log('complete sent');
+          console.log("complete sent");
         }
       });
     });
   }
 });
 
-
-const http = require('http');
-const hostname = '0.0.0.0';
-const port = 3000;
+const http = require("http");
+const hostname = "0.0.0.0";
+const port = 3001;
 let load_model;
 const server = http.createServer((req, res) => {
   if (!load_model) {
-    load_model = require('./lib/js/ssvm_nodejs_starter_lib.js').load_model;
+    load_model = require("./lib/js/ssvm_nodejs_starter_lib.js").load_model;
   }
   res.end(load_model());
 });
