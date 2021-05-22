@@ -1,6 +1,4 @@
 import wasmtime
-from wasmer import engine, wasi, Store, Module, Instance
-from wasmer_compiler_cranelift import Compiler
 
 
 def get_string_ptr(string, instance):
