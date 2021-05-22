@@ -1,4 +1,4 @@
-import {loadModel} from "./lib/js/glue.mjs";
+import { loadModel } from "./lib/js/glue.mjs";
 
 const output = loadModel();
 
