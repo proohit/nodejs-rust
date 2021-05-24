@@ -13,7 +13,7 @@ elif arch in wasmtime_supported_machines:
     print(f"importing for {arch} using wasmtime")
     import lib.python.glue_wasmtime as glue
 else:
-    RuntimeError("Platform not supported")
+    raise RuntimeError("Platform not supported")
 
 output = glue.load_model()
 
