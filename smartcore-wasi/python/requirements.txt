@@ -1,3 +1,4 @@
 wasmer==1.0.0
 wasmer_compiler_cranelift==1.0.0
 wasmtime==0.26.0
+azure-iot-device
