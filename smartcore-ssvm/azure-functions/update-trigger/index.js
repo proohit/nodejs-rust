@@ -1,7 +1,11 @@
 module.exports = async function (context, req) {
-  const { release, repository } = req.body;
+  const { release, repository, action } = req.body;
   const { tag_name } = release;
   const { html_url } = repository;
+
+  if (action !== "published") {
+    return;
+  }
 
   const Client = require("azure-iothub").Client;
   const Message = require("azure-iot-common").Message;
@@ -42,7 +46,7 @@ module.exports = async function (context, req) {
           action: "update",
           url: `${html_url}/releases/download`,
           version: tag_name,
-          runtimes: ["js"],
+          runtimes: ["js", "python"],
         })
       );
       message.ack = "full";
