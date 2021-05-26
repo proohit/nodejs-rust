@@ -9,7 +9,7 @@ fn main() {
     std::mem::forget(ptr);
     #[cfg(target_arch = "x86_64")]
     init(ptr.cast::<i8>());
-    #[cfg(all(target_arch = "aarch64", target_arch = "arm"))]
+    #[cfg(not(target_arch = "x86_64"))]
     init(ptr);
     let mut performances: Vec<u128> = Vec::new();
     let start_time = Utc::now();
