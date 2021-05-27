@@ -48,7 +48,7 @@ for file in files:
     data = raw[data_idx::].replace('\n', '').replace('data:', '').replace(
         '[', '').replace(']', '').replace(' ', '').split(',')
     with open(f'prepared-data/prepared-{file}', 'w', newline='') as output:
-        field_names = ['startTime (UTC)', 'endTime (UTC)', 'arch',
+        field_names = ['startTime (UTC)', 'endTime (UTC)', 'device', 'arch',
                        'os', 'osVersion', 'runtime', 'kernel', 'time (ns)']
         wrt = csv.DictWriter(output, delimiter=",", fieldnames=field_names)
         wrt.writeheader()
