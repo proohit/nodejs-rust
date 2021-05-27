@@ -2,6 +2,7 @@ import time
 import datetime
 from wasmer import engine, wasi, Store, Module, Instance
 from wasmer_compiler_cranelift import Compiler
+import os
 
 
 def get_string_ptr(string, instance):
@@ -30,8 +31,12 @@ instance = Instance(module, import_object)
     f'{relative_dir}/iris_knn.model', instance)
 instance.exports.init(file_ptr)
 perfomances = []
+num_executions = 1000
+if os.environ.get("noe") is not None:
+    num_executions = int(os.environ.get("noe"))
+print(f"Executing {num_executions} times")
 start_time = datetime.datetime.now()
-for i in range(1000):
+for i in range(num_executions):
     t1 = time.monotonic_ns()
     instance.exports.load_model()
     t2 = time.monotonic_ns()

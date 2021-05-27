@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,7 +37,12 @@ func main() {
 	loadModel, _ := instance.Exports.GetFunction("load_model")
 	startTime := time.Now().UTC().String()
 	performances := []int64{}
-	for i := 0; i < 1000; i++ {
+	numberOfExecutions := 1000
+	if os.Getenv("noe") != "" {
+		numberOfExecutions, _ = strconv.Atoi(os.Getenv("noe"))
+	}
+	println("Executing " + strconv.Itoa(numberOfExecutions) + " times")
+	for i := 0; i < numberOfExecutions; i++ {
 		t0 := time.Now()
 		loadModel()
 		performances = append(performances, time.Since(t0).Nanoseconds())

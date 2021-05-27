@@ -48,8 +48,9 @@ const initialize = async () => {
 initialize().then(() => {
   const performances = [];
   let startTime = new Date();
-
-  for (let i = 0; i < 1000; i++) {
+  const numberOfExecutions = parseInt(process.env.noe) || 1000;
+  console.log(`Executing ${numberOfExecutions} times`);
+  for (let i = 0; i < numberOfExecutions; i++) {
     const t0 = process.hrtime.bigint();
     instance.exports.load_model();
     const t1 = process.hrtime.bigint();

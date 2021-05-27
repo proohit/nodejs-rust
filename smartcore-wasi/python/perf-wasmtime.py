@@ -1,6 +1,7 @@
 import time
 import datetime
 import wasmtime
+import os
 
 
 def get_string_ptr(string, instance):
@@ -37,9 +38,10 @@ smartcore_wasi = linker.instantiate(module)
 (file_ptr, file_len) = get_string_ptr(
     f'{relative_dir}/iris_knn.model', smartcore_wasi)
 smartcore_wasi.exports["init"](file_ptr)
-
-
 perfomances = []
+if os.environ.get("noe") is not None:
+    num_executions = int(os.environ.get("noe"))
+print(f"Executing {num_executions} times")
 start_time = datetime.datetime.now()
 for i in range(1000):
     t1 = time.monotonic_ns()
