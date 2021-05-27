@@ -23,3 +23,6 @@ pkg
 .DS_Store
 
 test2.txt
+
+data
+prepared-data
