@@ -43,7 +43,7 @@ if os.environ.get("noe") is not None:
     num_executions = int(os.environ.get("noe"))
 print(f"Executing {num_executions} times")
 start_time = datetime.datetime.now()
-for i in range(1000):
+for i in range(num_executions):
     t1 = time.monotonic_ns()
     smartcore_wasi.exports["load_model"]()
     t2 = time.monotonic_ns()
