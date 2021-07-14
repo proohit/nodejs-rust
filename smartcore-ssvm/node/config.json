@@ -1,6 +1,0 @@
-{
-    "deviceConnection": "",
-    "hubConnection": "",
-    "registryReadConnection": "",
-    "modelPath": "../pkg/iris_knn.model"
-}
